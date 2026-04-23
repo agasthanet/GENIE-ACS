@@ -1,0 +1,14 @@
+# Virtual Parameters for RX Power
+
+This document describes the virtual parameters used in measuring RX power.
+
+## Overview
+RX power represents the received signal strength indicator (RSSI) and is crucial for monitoring the quality of the wireless connection.
+
+## Parameters
+- **RX Power Level (dBm)**: Represents the strength of the received signal measured in decibels relative to 1 milliwatt.
+- **Signal-to-Noise Ratio (SNR)**: A measure that compares the level of a desired signal to the level of background noise.
+- **RSSI Threshold**: The minimum acceptable level of RSSI to maintain a reliable connection.
+
+## Usage
+These parameters can be used for analytics in network performance and optimization strategies. Adjustments to the system may be influenced by these measurements to ensure connectivity and quality service.
