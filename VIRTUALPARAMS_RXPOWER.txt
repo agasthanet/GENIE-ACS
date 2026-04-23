@@ -1,14 +1,60 @@
-# Virtual Parameters for RX Power
+// RX POWER ONU
+function getParameterValue(keys) {
+	for (let key of keys) {
+		let d = declare(key, {
+			path: Date.now() - (120 * 1000),
+			value: Date.now()
+		});
+		if (!d) continue;
 
-This document describes the virtual parameters used in measuring RX power.
+		for (let item of d) {
+			let raw = item.value && item.value[0];
 
-## Overview
-RX power represents the received signal strength indicator (RSSI) and is crucial for monitoring the quality of the wireless connection.
+			if (raw === null || raw === undefined || raw === '') continue;
 
-## Parameters
-- **RX Power Level (dBm)**: Represents the strength of the received signal measured in decibels relative to 1 milliwatt.
-- **Signal-to-Noise Ratio (SNR)**: A measure that compares the level of a desired signal to the level of background noise.
-- **RSSI Threshold**: The minimum acceptable level of RSSI to maintain a reliable connection.
+			let val;
 
-## Usage
-These parameters can be used for analytics in network performance and optimization strategies. Adjustments to the system may be influenced by these measurements to ensure connectivity and quality service.
+			// CASE 1: string dBm
+			if (typeof raw === 'string' && raw.toLowerCase().includes('dbm')) {
+				let match = raw.match(/-?\d+(\.\d+)?/);
+				if (match) {
+					return Math.round(Number(match[0]));
+				}
+				continue;
+			}
+
+			// CASE 2: numeric
+			val = Number(raw);
+			if (isNaN(val)) continue;
+
+			if (val < 0) {
+				return Math.round(val);
+			}
+
+			if (val > 0) {
+				return Math.round(10 * Math.log10(val / 10000));
+			}
+		}
+	}
+	return 'N/A';
+}
+
+// MAIN
+let result = '';
+
+if (args[1] && args[1].value && args[1].value[0] !== undefined) {
+	let raw = args[1].value[0];
+
+	if (typeof raw === 'string' && raw.toLowerCase().includes('dbm')) {
+		let match = raw.match(/-?\d+(\.\d+)?/);
+		result = match ? Math.round(Number(match[0])) : 'N/A';
+	} else {
+		let val = Number(raw);
+		result = isNaN(val) ? 'N/A' : Math.round(val);
+	}
+} else {
+	let keys = ['InternetGatewayDevice.WANDevice.1.*.RXPower'];
+	result = getParameterValue(keys);
+}
+
+return { writable: false, value: [result, "xsd:int"] };
